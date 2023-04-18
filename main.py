@@ -74,7 +74,7 @@ def random_address() -> dict:
 	return {
 		**random.choice(ADDRESSES),
 		"nbr": random.randint(1, 40),
-		"phone": "314" + "".join(str(random.randint(0,9)) for _ in range(7))
+		"phone": FAKER.phone_number()
 	}
 
 def purify_address(address: dict[str, str]):
@@ -161,27 +161,9 @@ async def auto_post(text, identity) -> str:
 		if proxy in PROXIES: PROXIES.remove(proxy)
 		return await auto_post(text, identity)
 
-async def proxy_post_job(proxy: str):
-	identity = random_identity()
-	text = " ".join((MARKOV() for _ in range(6)))[:400]
-	res = await wrapped_post(text, identity, proxy)
-	if res is None: return
-	if "You have already submitted this form." in res:
-		CONSOLE.print(f"|{arrow.utcnow()}| posted form")
-		CONSOLE.print(f"[red]{proxy=} Form already submitted[/red]")
-	if "Success! Thanks for filling out our form!" in res:
-		CONSOLE.print(f"|{arrow.utcnow()}| posted form")
-		CONSOLE.print(f"[green]{proxy=} Success[/green]")
-		with open(LOGS / f"{int(time.time()*100)}.html", "w") as f:
-			f.write("IDENTITY\n")
-			f.write(str(identity) + "\n")
-			f.write("TEXT\n")
-			f.write(text + "\n")
-			f.write(res)
-
 async def post_job():
 	identity = random_identity()
-	text = " ".join((MARKOV() for _ in range(20)))
+	text = " ".join((MARKOV() for _ in range(6)))[:400]
 	res = await auto_post(text, identity)
 	if "You have already submitted this form." in res:
 		CONSOLE.print(f"|{arrow.utcnow()}| posted form")
@@ -204,10 +186,6 @@ async def post_loop():
 async def main():
 	CONSOLE.rule("Let's go!")
 	await asyncio.gather(*(post_loop() for _ in range(50)))
-
-async def proxy_set_main():
-	CONSOLE.rule("Let's go!")
-	await asyncio.gather(*(proxy_post_job(proxy) for proxy in PROXIES))
 
 if __name__ == "__main__":
 	asyncio.run(main())
