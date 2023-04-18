@@ -135,7 +135,7 @@ async def post(report_text: str, identity: dict, proxy: str) -> str:
 	headers = {
 		#"Content-Type": "application/json",
 		"User-Agent": FAKER.user_agent(),
-		"X-Forwarded-For": FAKER.ipv4(),
+		#"X-Forwarded-For": FAKER.ipv4(),
 		# suggested by https://www.reddit.com/user/forgetful_egg/
 		# but it doesn't seem to work here(?)
 		"Cookie": ""
