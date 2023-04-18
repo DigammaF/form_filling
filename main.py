@@ -163,7 +163,7 @@ async def auto_post(text, identity) -> str:
 
 async def proxy_post_job(proxy: str):
 	identity = random_identity()
-	text = " ".join((MARKOV() for _ in range(20)))
+	text = " ".join((MARKOV() for _ in range(6)))[:400]
 	res = await wrapped_post(text, identity, proxy)
 	if res is None: return
 	if "You have already submitted this form." in res:
