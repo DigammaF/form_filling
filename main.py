@@ -11,6 +11,7 @@ import arrow
 
 from pathlib import Path
 from markovchain.text import MarkovText
+from faker import Faker
 
 CONSOLE = rich.get_console()
 
@@ -56,6 +57,8 @@ with open("http_proxies.txt") as f:
 	for line in f:
 		PROXIES.append(line.strip())
 
+CONSOLE.print(f"Found {len(PROXIES)} proxies")
+
 CONSOLE.rule("Setting details")
 
 URL = r"https://ago.mo.gov/file-a-complaint/transgender-center-concerns?sf_cntrl_id=ctl00%24MainContent%24C001"
@@ -64,7 +67,8 @@ LOGS = Path("logs")
 if not LOGS.exists(): LOGS.mkdir()
 CONSOLE.print(f"{URL=}")
 CONSOLE.print(f"{LOGS=}")
-CONSOLE.print(f"{USER_AGENT=}")
+
+FAKER = Faker()
 
 def random_address() -> dict:
 	return {
@@ -129,10 +133,16 @@ async def post(report_text: str, identity: dict, proxy: str) -> str:
 		"ParagraphTextFieldController": report_text,
 	}
 	headers = {
-		"User-Agent": USER_AGENT
+		#"Content-Type": "application/json",
+		"User-Agent": FAKER.user_agent(),
+		#"X-Forwarded-For": FAKER.ipv4(),
+		# suggested by https://www.reddit.com/user/forgetful_egg/
+		# but it doesn't seem to work here(?)
+		"Cookie": ""
 	}
+	proxy_url=f"http://{proxy}"
 	async with aiohttp.ClientSession() as session:
-		async with session.post(URL, data=args, timeout=5, proxy=f"http://{proxy}", headers=headers) as req:
+		async with session.post(URL, data=args, timeout=5, proxy=proxy_url, headers=headers) as req:
 			return await req.text()
 
 async def wrapped_post(report_text: str, identity: dict, proxy: str):
