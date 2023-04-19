@@ -142,18 +142,13 @@ async def post(report_text: str, identity: dict, proxy: str) -> str:
 	}
 	proxy_url=f"http://{proxy}"
 	async with aiohttp.ClientSession() as session:
-		async with session.post(URL, data=args, timeout=5, proxy=proxy_url, headers=headers) as req:
+		async with session.post(URL, data=args, timeout=15, proxy=proxy_url, headers=headers) as req:
 			return await req.text()
-
-async def wrapped_post(report_text: str, identity: dict, proxy: str):
-	try:
-		return await post(report_text, identity, proxy)
-	except:
-		return None
 
 async def auto_post(text, identity) -> str:
 
-	proxy = random.choice(PROXIES)
+	#proxy = random.choice(PROXIES)
+	proxy = PROXIES.pop()
 
 	try:
 		return await post(text, identity, proxy)
